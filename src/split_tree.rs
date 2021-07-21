@@ -30,6 +30,7 @@ impl Split {
         }
     }
 
+    #[allow(unused)]
     fn alternating(i: i32) -> Self {
         Self {
             direction: if i % 2 == 0 {

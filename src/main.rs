@@ -12,13 +12,14 @@ struct Model {
     tree: SplitTree,
     num_lines: u32,
     frames_per_cycle: u64,
+    save_frame: bool,
 }
 
 fn model(app: &App) -> Model {
     let _window = app
         .new_window()
         .key_pressed(key_pressed)
-        .size(1080, 1920)
+        .size(1000, 1000)
         .view(view)
         .build()
         .unwrap();
@@ -26,6 +27,7 @@ fn model(app: &App) -> Model {
         tree: SplitTree::random(10),
         num_lines: 15,
         frames_per_cycle: 900,
+        save_frame: false,
     }
 }
 
@@ -81,25 +83,38 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     draw.to_frame(app, &frame).unwrap();
 
-    // save this frame
-    /* if app.elapsed_frames() <= model.frames_per_cycle {
-        let file_path = captured_frame_path(app, &frame);
-        app.main_window().capture_frame(file_path);
-    } else {
-        app.quit();
-    } */
+    // save this frame if f was pressed
+    if model.save_frame {
+        save_frame(app, &frame);
+    }
+
+    // uncomment to record looping video frames
+    // if app.elapsed_frames() <= model.frames_per_cycle {
+    //    let file_path = captured_frame_path(app, &frame);
+    //    app.main_window().capture_frame(file_path);
+    // } else {
+    //     app.quit();
+    // }
 }
 
-fn captured_frame_path(app: &App, frame: &Frame) -> std::path::PathBuf {
-    app.project_path()
+fn save_frame(app: &App, frame: &Frame) {
+    let file_path = app
+        .project_path()
         .expect("failed to locate `project_path`")
-        .join(app.exe_name().unwrap())
-        .join(format!("{:03}", frame.nth()))
-        .with_extension("jpeg")
+        .join("frames")
+        .join(format!("frame-{:04}", frame.nth()))
+        .with_extension("jpeg");
+    app.main_window().capture_frame(file_path);
 }
 
 fn key_pressed(_app: &App, model: &mut Model, key: Key) {
-    if let Key::Space = key {
-        model.tree = SplitTree::random(10);
+    match key {
+        Key::Space => {
+            model.tree = SplitTree::random(10);
+        }
+        Key::R => {
+            model.save_frame = !model.save_frame;
+        }
+        _ => {}
     }
 }
