@@ -63,7 +63,7 @@ impl SplitTree {
     pub fn random(depth: i32) -> SplitTree {
         if depth > 0 {
             Node {
-                value: Split::random(),
+                value: Split::alternating(depth),
                 a: Box::new(Self::random(depth - 1)),
                 b: Box::new(Self::random(depth - 1)),
             }

@@ -9,6 +9,7 @@ fn main() {
 }
 
 struct Model {
+    texture: Option<wgpu::Texture>,
     tree: SplitTree,
     num_lines: u32,
     frames_per_cycle: u64,
@@ -19,12 +20,17 @@ fn model(app: &App) -> Model {
     let _window = app
         .new_window()
         .key_pressed(key_pressed)
-        .size(1000, 1000)
+        .size(1200, 1200)
         .view(view)
         .build()
         .unwrap();
+    let assets = app.assets_path().unwrap();
+    let img_path = assets.join("posters").join("poster1.jpeg");
+    let texture = wgpu::Texture::from_path(app, img_path).ok();
+
     Model {
-        tree: SplitTree::random(10),
+        texture,
+        tree: SplitTree::random(8),
         num_lines: 15,
         frames_per_cycle: 900,
         save_frame: false,
@@ -62,23 +68,62 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 rect.bottom_right(),
             )
         };
-        let n =
-            (model.num_lines as f32).min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
-        if rect.w() > 10.0 && rect.h() > 10.0 {
-            for i in 0..(n.ceil() as u32) {
-                draw.line()
-                    .weight(1.0)
-                    .color(WHITE)
-                    .start(Vec2::lerp(a, b, i as f32 / n as f32))
-                    .end(Vec2::lerp(c, d, i as f32 / n as f32));
+
+        if let Some(tex) = &model.texture {
+            let n = (model.num_lines as f32)
+                .min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
+
+            if rect.w() > 10.0 && rect.h() > 10.0 {
+                for i in 0..(n.ceil() as u32) {
+                    draw.line()
+                        .weight(1.0)
+                        .color(WHITE)
+                        .start(Vec2::lerp(a, b, i as f32 / n as f32))
+                        .end(Vec2::lerp(c, d, i as f32 / n as f32));
+                }
+
+                //for i in 0..(n.ceil() as u32) {
+                let [w, h] = tex.size();
+                let ratio = w as f32 / h as f32;
+                let tex_bounds = if rect.w() < rect.h() && rect.w() * (1.0 / ratio) < rect.h() {
+                    Rect::from_w_h(rect.w(), rect.w() * (1.0 / ratio))
+                        .align_left_of(rect)
+                        .align_top_of(rect)
+                } else {
+                    Rect::from_w_h(rect.h() * ratio, rect.h())
+                        .align_left_of(rect)
+                        .align_top_of(rect)
+                };
+                draw.texture(tex).wh(tex_bounds.wh()).xy(tex_bounds.xy());
+
+                // }
             }
+
+            draw.rect()
+                .xy(rect.xy())
+                .wh(rect.wh())
+                .stroke(WHITE)
+                .stroke_weight(2.0)
+                .no_fill();
+        } else {
+            let n = (model.num_lines as f32)
+                .min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
+            if rect.w() > 10.0 && rect.h() > 10.0 {
+                for i in 0..(n.ceil() as u32) {
+                    draw.line()
+                        .weight(1.0)
+                        .color(WHITE)
+                        .start(Vec2::lerp(a, b, i as f32 / n as f32))
+                        .end(Vec2::lerp(c, d, i as f32 / n as f32));
+                }
+            }
+            draw.rect()
+                .xy(rect.xy())
+                .wh(rect.wh())
+                .stroke(BLACK)
+                .stroke_weight(4.0)
+                .no_fill();
         }
-        draw.rect()
-            .xy(rect.xy())
-            .wh(rect.wh())
-            .stroke(WHITE)
-            .stroke_weight(1.0)
-            .no_fill();
     }
 
     draw.to_frame(app, &frame).unwrap();
@@ -90,8 +135,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     // uncomment to record looping video frames
     // if app.elapsed_frames() <= model.frames_per_cycle {
-    //    let file_path = captured_frame_path(app, &frame);
-    //    app.main_window().capture_frame(file_path);
+    //     save_frame(app, &frame);
     // } else {
     //     app.quit();
     // }
