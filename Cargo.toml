@@ -1,6 +1,6 @@
 [package]
 name = "streifen"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Joshua Peschke <joshua.peschke@gmail.com>"]
 edition = "2018"
 

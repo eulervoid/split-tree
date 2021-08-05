@@ -22,10 +22,11 @@ fn model(app: &App) -> Model {
         .key_pressed(key_pressed)
         .size(1200, 1200)
         .view(view)
+        .msaa_samples(4)
         .build()
         .unwrap();
     let assets = app.assets_path().unwrap();
-    let img_path = assets.join("posters").join("poster1.jpeg");
+    let img_path = assets.join("posters").join("poster2.jpeg");
     let texture = wgpu::Texture::from_path(app, img_path).ok();
 
     Model {
@@ -82,7 +83,6 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         .end(Vec2::lerp(c, d, i as f32 / n as f32));
                 }
 
-                //for i in 0..(n.ceil() as u32) {
                 let [w, h] = tex.size();
                 let ratio = w as f32 / h as f32;
                 let tex_bounds = if rect.w() < rect.h() && rect.w() * (1.0 / ratio) < rect.h() {
@@ -94,9 +94,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         .align_left_of(rect)
                         .align_top_of(rect)
                 };
-                draw.texture(tex).wh(tex_bounds.wh()).xy(tex_bounds.xy());
 
-                // }
+                draw.texture(tex)
+                    .wh(tex_bounds.wh())
+                    .xy(tex_bounds.xy())
+                    .area(Rect::from_x_y_w_h(0.5, 0.5, 1.0, 1.0));
             }
 
             draw.rect()
