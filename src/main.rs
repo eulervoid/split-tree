@@ -10,7 +10,6 @@ fn main() {
 
 struct Model {
     tree: SplitTree,
-    num_lines: u32,
     frames_per_cycle: u64,
     save_frame: bool,
 }
@@ -27,7 +26,6 @@ fn model(app: &App) -> Model {
 
     Model {
         tree: SplitTree::random(8),
-        num_lines: 15,
         frames_per_cycle: 900,
         save_frame: false,
     }
