@@ -2,6 +2,7 @@ mod binary_tree;
 mod split_tree;
 
 use nannou::prelude::*;
+use nannou::text::*;
 use split_tree::*;
 
 fn main() {
@@ -12,22 +13,29 @@ struct Model {
     tree: SplitTree,
     frames_per_cycle: u64,
     save_frame: bool,
+    font: Font,
+    font_bold: Font,
 }
 
 fn model(app: &App) -> Model {
     let _window = app
         .new_window()
         .key_pressed(key_pressed)
-        .size(1920, 1080)
+        .size(1200, 1200)
         .view(view)
         .msaa_samples(4)
         .build()
         .unwrap();
 
+    let font_data: &[u8] = include_bytes!("../font/apercu-mono.ttf");
+    let font_bold_data: &[u8] = include_bytes!("../font/apercu-mono-bold.ttf");
+
     Model {
-        tree: SplitTree::random(8),
-        frames_per_cycle: 900,
+        tree: SplitTree::random(9),
+        frames_per_cycle: 600,
         save_frame: false,
+        font: Font::from_bytes(font_data).unwrap(),
+        font_bold: Font::from_bytes(font_bold_data).unwrap(),
     }
 }
 
@@ -43,7 +51,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         .tree
         .map_nodes(&displace)
         .rectangles(app.window_rect());
-    let draw = app.draw(); //.scale(0.9);
+    let draw = app.draw().scale(0.9);
     draw.background().color(BLACK);
 
     for rect in rects {
@@ -61,13 +69,21 @@ fn view(app: &App, model: &Model, frame: Frame) {
             .map(|(i, corner)| (pt2(corner[0], corner[1]), colors[i]))
             .collect();
         draw.polygon().points_colored(points_colored);
-        draw.rect()
-            .xy(rect.xy())
-            .wh(rect.wh())
-            .no_fill()
-            .stroke_weight(1.0)
-            .stroke_color(rgba(1.0, 1.0, 1.0, 0.2));
     }
+
+    /*draw.text("Riotvan\n\n\nLive at Robert Johnson")
+            .color(WHITE)
+            .font_size(40)
+            .line_spacing(40.0)
+            .font(model.font.clone())
+            .wh(app.main_window().rect().wh());
+
+        draw.text("R  O  U  T  I  N  E")
+            .color(WHITE)
+            .font_size(52)
+            .font(model.font_bold.clone())
+            .wh(app.main_window().rect().wh());
+    */
 
     draw.to_frame(app, &frame).unwrap();
 
@@ -77,11 +93,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
     }
 
     // uncomment to record looping video frames
-    // if app.elapsed_frames() <= model.frames_per_cycle {
-    //     save_frame(app, &frame);
-    // } else {
-    //     app.quit();
-    // }
+    /*if app.elapsed_frames() <= model.frames_per_cycle {
+        save_frame(app, &frame);
+    } else {
+        app.quit();
+    }*/
 }
 
 fn save_frame(app: &App, frame: &Frame) {
