@@ -9,9 +9,7 @@ fn main() {
 }
 
 struct Model {
-    texture: Option<wgpu::Texture>,
     tree: SplitTree,
-    num_lines: u32,
     frames_per_cycle: u64,
     save_frame: bool,
 }
@@ -25,14 +23,9 @@ fn model(app: &App) -> Model {
         .msaa_samples(4)
         .build()
         .unwrap();
-    let assets = app.assets_path().unwrap();
-    let img_path = assets.join("posters").join("poster2.jpeg");
-    let texture = wgpu::Texture::from_path(app, img_path).ok();
 
     Model {
-        texture,
-        tree: SplitTree::random(10),
-        num_lines: 15,
+        tree: SplitTree::random(9),
         frames_per_cycle: 600,
         save_frame: false,
     }
@@ -54,85 +47,25 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.background().color(BLACK);
 
     for rect in rects {
-        let (a, b, c, d) = if rect.w() > rect.h() {
-            (
-                rect.top_left(),
-                rect.top_right(),
-                rect.bottom_left(),
-                rect.bottom_right(),
-            )
-        } else {
-            (
-                rect.top_left(),
-                rect.bottom_left(),
-                rect.top_right(),
-                rect.bottom_right(),
-            )
-        };
-
-        if let Some(_tex) = &model.texture {
-            let n = (model.num_lines as f32)
-                .min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
-
-            if rect.w() > 10.0 && rect.h() > 10.0 {
-                for i in 0..(n.ceil() as u32) {
-                    draw.line()
-                        .weight(1.0)
-                        .color(WHITE)
-                        .start(Vec2::lerp(a, b, i as f32 / n as f32))
-                        .end(Vec2::lerp(c, d, i as f32 / n as f32));
-                }
-
-                /*
-                let [w, h] = tex.size();
-                let ratio = w as f32 / h as f32;
-                let tex_bounds = if rect.w() < rect.h() && rect.w() * (1.0 / ratio) < rect.h() {
-                    Rect::from_w_h(rect.w(), rect.w() * (1.0 / ratio))
-                        .align_left_of(rect)
-                        .align_top_of(rect)
-                } else {
-                    Rect::from_w_h(rect.h() * ratio, rect.h())
-                        .align_left_of(rect)
-                        .align_top_of(rect)
-                };
-
-                draw.texture(tex)
-                    .wh(tex_bounds.wh())
-                    .xy(tex_bounds.xy())
-                    .area(Rect::from_x_y_w_h(0.5, 0.5, 1.0, 1.0));
-                */
-            }
-
-            draw.rect()
-                .xy(rect.xy())
-                .wh(rect.wh())
-                .stroke(WHITE)
-                .stroke_weight(2.0)
-                .no_fill();
-        } else {
-            let n = (model.num_lines as f32)
-                .min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
-            if rect.w() > 10.0 && rect.h() > 10.0 {
-                for i in 0..(n.ceil() as u32) {
-                    draw.line()
-                        .weight(1.0)
-                        .color(WHITE)
-                        .start(Vec2::lerp(a, b, i as f32 / n as f32))
-                        .end(Vec2::lerp(c, d, i as f32 / n as f32));
-                }
-            }
-            draw.rect()
-                .xy(rect.xy())
-                .wh(rect.wh())
-                .stroke(BLACK)
-                .stroke_weight(4.0)
-                .no_fill();
-        }
+        let [rw, rh] = (rect.wh() / frame.rect().wh()).to_array();
+        let hue = rw / (rh + 0.5);
+        let colors = [
+            hsv(hue, 1.0, 0.8),
+            hsv(hue + 0.5, 1.0, 0.8),
+            hsv(hue + 0.5, 1.0, 0.8),
+            hsv(hue, 1.0, 0.8),
+        ];
+        let points_colored: Vec<(Vec2, Hsv)> = rect
+            .corners_iter()
+            .enumerate()
+            .map(|(i, corner)| (pt2(corner[0], corner[1]), colors[i]))
+            .collect();
+        draw.polygon().points_colored(points_colored);
     }
 
     draw.to_frame(app, &frame).unwrap();
 
-    // save this frame if f was pressed
+    // save this frame if r was pressed
     if model.save_frame {
         save_frame(app, &frame);
     }
