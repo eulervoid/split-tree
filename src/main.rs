@@ -31,9 +31,9 @@ fn model(app: &App) -> Model {
 
     Model {
         texture,
-        tree: SplitTree::random(8),
+        tree: SplitTree::random(10),
         num_lines: 15,
-        frames_per_cycle: 900,
+        frames_per_cycle: 600,
         save_frame: false,
     }
 }
@@ -70,7 +70,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
             )
         };
 
-        if let Some(tex) = &model.texture {
+        if let Some(_tex) = &model.texture {
             let n = (model.num_lines as f32)
                 .min(5.0 * abs((rect.w() / rect.h()) - (rect.h() / rect.w())));
 
@@ -83,6 +83,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         .end(Vec2::lerp(c, d, i as f32 / n as f32));
                 }
 
+                /*
                 let [w, h] = tex.size();
                 let ratio = w as f32 / h as f32;
                 let tex_bounds = if rect.w() < rect.h() && rect.w() * (1.0 / ratio) < rect.h() {
@@ -99,6 +100,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                     .wh(tex_bounds.wh())
                     .xy(tex_bounds.xy())
                     .area(Rect::from_x_y_w_h(0.5, 0.5, 1.0, 1.0));
+                */
             }
 
             draw.rect()
@@ -136,11 +138,13 @@ fn view(app: &App, model: &Model, frame: Frame) {
     }
 
     // uncomment to record looping video frames
-    // if app.elapsed_frames() <= model.frames_per_cycle {
-    //     save_frame(app, &frame);
-    // } else {
-    //     app.quit();
-    // }
+    /*
+    if app.elapsed_frames() <= model.frames_per_cycle {
+        save_frame(app, &frame);
+    } else {
+        app.quit();
+    }
+    */
 }
 
 fn save_frame(app: &App, frame: &Frame) {
