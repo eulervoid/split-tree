@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 nannou = "*"
 rand = "*"
+svg = "0.10.0"

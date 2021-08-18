@@ -2335,7 +2335,8 @@ name = "streifen"
 version = "0.2.0"
 dependencies = [
  "nannou",
- "rand 0.7.3",
+ "rand 0.8.4",
+ "svg",
 ]
 
 [[package]]
@@ -2343,6 +2344,12 @@ name = "strsim"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
+
+[[package]]
+name = "svg"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e72d8b19ab05827afefcca66bf47040c1e66a0901eb814784c77d4ec118bd309"
 
 [[package]]
 name = "syn"
