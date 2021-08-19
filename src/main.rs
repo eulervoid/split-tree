@@ -26,14 +26,14 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
     let assets = app.assets_path().unwrap();
-    let img_path = assets.join("posters").join("poster2.jpeg");
+    let img_path = assets.join("posters").join("poster3.jpeg");
     let texture = wgpu::Texture::from_path(app, img_path).ok();
 
     Model {
         texture,
         tree: SplitTree::random(8),
         num_lines: 15,
-        frames_per_cycle: 900,
+        frames_per_cycle: 600,
         save_frame: false,
     }
 }
@@ -136,11 +136,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
     }
 
     // uncomment to record looping video frames
-    // if app.elapsed_frames() <= model.frames_per_cycle {
-    //     save_frame(app, &frame);
-    // } else {
-    //     app.quit();
-    // }
+    if app.elapsed_frames() <= model.frames_per_cycle {
+        save_frame(app, &frame);
+    } else {
+        app.quit();
+    }
 }
 
 fn save_frame(app: &App, frame: &Frame) {
